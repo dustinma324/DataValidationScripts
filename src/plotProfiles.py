@@ -1,39 +1,48 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.integrate import simps
 
 # Define the file path
-file_path = "/home/tma/Desktop/DataValidationScripts/chan395/profiles/chan395.means"
+file_path = "../chan2000/LM_Channel_2000_mean_prof.dat.txt"
 
 # Number of header rows to skip
-header_lines_to_skip = 24
+header_lines_to_skip = 71
+
+# Column names
+column_names = ["y/delta", "y^+", "U", "dU/dy", "W", "P"]
+
+# Additional variables
+nx = 4096
+ny = 768
+nz = 3072
+Lx = 8 * np.pi
+Lz = 3 * np.pi
+n = 7
+nu = 2.30000e-05
+delta = 1.000
+U_mean = 1.000
+u_tau = 4.58794e-02
+Re_tau = 1994.756
 
 # Read the file into a pandas DataFrame, skipping the header lines and setting column names
 try:
-    df = pd.read_csv(file_path, delimiter='\s+', skiprows=header_lines_to_skip, header=None, names=["y", "y+", "Umean", "col4", "col5", "col6", "col7"])  # Use '\s+' for any whitespace delimiter
+    df = pd.read_csv(file_path, delimiter='\s+', skiprows=header_lines_to_skip, header=None, names=column_names)
     
     # Extracting the required columns and converting to floats
-    y = df["y"].iloc[1:].reset_index(drop=True).astype(float)
-    Umean = df["Umean"].iloc[1:].reset_index(drop=True).astype(float)
+    y_plus = df.iloc[1:, df.columns.get_loc("y^+")].reset_index(drop=True).astype(float)
+    u_plus = df.iloc[1:, df.columns.get_loc("U")].reset_index(drop=True).astype(float)
+    y_over_delta = df.iloc[1:, df.columns.get_loc("y/delta")].reset_index(drop=True).astype(float)
     
-    # Calculate Ubulk (normalized integral of Umean with respect to y)
-    H = 1.0  # Assuming H is the height and normalizing factor
-    Ubulk = simps(Umean, y) / H
+    # Calculate u_mean
+    u_mean = u_plus * u_tau
     
-    # Print Ubulk value
-    print(f"Ubulk: {Ubulk}")
-    
-    # Plotting
-    plt.figure(figsize=(12, 10))
-    plt.plot(Umean, y, marker='o', linestyle='-', color='b', label=r"Moser1999, $Re_{\tau}=395$")
+    # Plotting figure 1: Semilogx plot
+    plt.figure(figsize=(12, 8))
+    plt.semilogx(y_plus, u_plus, marker='o', linestyle='-', color='b', label="LM2015 $Re_{\\tau}=2000$")
     
     # Labels
-    plt.xlabel(r'$\overline{U}$', fontsize=14, fontname='serif')
-    plt.ylabel(r'$y/H$', fontsize=14, fontname='serif')
-    
-    # Set y-axis range
-    plt.ylim(0.0, 1.0)
+    plt.xlabel(r'$y^+$', fontsize=14, fontname='serif')
+    plt.ylabel(r'$U^+$', fontsize=14, fontname='serif')
     
     # Turn off grid
     plt.grid(False)
@@ -41,8 +50,29 @@ try:
     # Legend
     plt.legend(fontsize=12)
     
-    # Use LaTeX interpreter for the figure
-    plt.rcParams.update({'mathtext.default': 'regular'})
+    # Set font to serif for all text elements
+    plt.rcParams['font.family'] = 'serif'
+    
+    # Set global font size
+    plt.rcParams.update({'font.size': 14})
+    
+    # Tight layout for Figure 1
+    plt.tight_layout()
+    
+    # Plotting figure 2: Second plot
+    plt.figure(figsize=(12, 8))
+    plt.plot(u_mean, y_over_delta, marker='o', linestyle='-', color='g', label="LM2015 $Re_{\\tau}=2000$")
+    
+    # Labels
+    plt.xlabel(r'$u_{mean}$', fontsize=14, fontname='serif')
+    plt.ylabel(r'$y/\delta$', fontsize=14, fontname='serif')
+    
+    # Set x and y limits
+    plt.xlim(0.0, 1.4)
+    plt.ylim(0.0, 1.0)
+    
+    # Legend
+    plt.legend(fontsize=12)
     
     # Set font to serif for all text elements
     plt.rcParams['font.family'] = 'serif'
@@ -50,8 +80,10 @@ try:
     # Set global font size
     plt.rcParams.update({'font.size': 14})
     
-    # Show plot
+    # Tight layout for Figure 2
     plt.tight_layout()
+    
+    # Show plots
     plt.show()
     
 except FileNotFoundError:
