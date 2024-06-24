@@ -58,6 +58,7 @@ try:
     
     # Tight layout for Figure 1
     plt.tight_layout()
+    plt.savefig('LogLaw.png', dpi=600)
     
     # Plotting figure 2: Second plot
     plt.figure(figsize=(12, 8))
@@ -82,6 +83,7 @@ try:
     
     # Tight layout for Figure 2
     plt.tight_layout()
+    plt.savefig('MeanVelocity.png', dpi=600)
     
     # Show plots
     plt.show()
