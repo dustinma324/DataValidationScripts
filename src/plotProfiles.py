@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 # Define the file path
 file_path = "../chan2000/LM_Channel_2000_mean_prof.dat.txt"
+file_path_mean = "./mean.dat"
 
 # Number of header rows to skip
 header_lines_to_skip = 71
@@ -62,7 +63,7 @@ try:
     })
     
     # Output DataFrame to TXT file with tab-separated values
-    output_df.to_csv('input_ReTau2000.txt', sep='\t', index=False)
+    output_df.to_csv('input_ReTau2000DNS.txt', sep='\t', index=False)
     
     # Plotting figure 1: Semilogx plot
     plt.figure(figsize=(12, 8))
