@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Define the file path
-file_path = "../chan2000/LM_Channel_2000_mean_prof.dat.txt"
+file_path_dns = "../chan2000/LM_Channel_2000_mean_prof.dat.txt"
 file_path_mean = "./mean.dat"
 
 # Number of header rows to skip
@@ -37,41 +37,59 @@ def smooth_log_law_profile(y_plus, u_tau, nu):
     B = 5.2
     return (1/kappa) * np.log(y_plus) + B
 
-y_plus_smooth = np.linspace(1e-3, smooth_delta, 500) * smooth_u_tau / smooth_nu
-u_plus_smooth = smooth_log_law_profile(y_plus_smooth, smooth_u_tau, smooth_nu)
+smooth_y_plus = np.linspace(1e-3, smooth_delta, 500) * smooth_u_tau / smooth_nu
+smooth_u_plus = smooth_log_law_profile(smooth_y_plus, smooth_u_tau, smooth_nu)
+
+def read_dns_data(filename):
+   columnsDNS = ["y/delta", "y^+", "U", "dU/dy", "W", "P"]
+   data_DNS = pd.read_csv(file_path_dns, delimiter='\s+', skiprows=header_lines_to_skip, header=None, names=column_names)
+   y_plus = data_DNS.iloc[1:, data_DNS.columns.get_loc("y^+")].reset_index(drop=True).astype(float)
+   u_plus = data_DNS.iloc[1:, data_DNS.columns.get_loc("U")].reset_index(drop=True).astype(float)
+   y_over_delta = data_DNS.iloc[1:, data_DNS.columns.get_loc("y/delta")].reset_index(drop=True).astype(float)
+   return y_plus, u_plus, y_over_delta
+
+dns_y_plus, dns_u_plus, y_over_delta = read_dns_data(file_path_dns)
+u_dns_data = dns_u_plus * u_tau
+v_mean_data = np.zeros_like(u_dns_data)
+output_df = pd.DataFrame({
+    'y_over_delta': y_over_delta,
+    'u_mean': u_dns_data,
+    'v_mean': v_mean_data
+})
+
+def read_mean_data(filename):
+    columns = ["time", "height", "u", "v", "w", "rho", "theta", "tke", "col9", "col10", "col11", "col12", "col13", "col14"]
+    data_toc = pd.read_csv(filename, sep='\s+', header=None, names=columns)
+    toc_z = data_toc.iloc[1:, data_toc.columns.get_loc("height")].reset_index(drop=True).astype(float)
+    toc_u_mean = data_toc.iloc[1:, data_toc.columns.get_loc("u")].reset_index(drop=True).astype(float)
+    return toc_z, toc_u_mean
+
+toc_z, toc_u_mean = read_mean_data(file_path_mean)
+toc_y_plus = toc_z*smooth_u_tau/smooth_nu
+toc_u_plus = toc_u_mean/smooth_u_tau
+
+def print_output(z, toc_u_mean):
+    print("Height (z):")
+    print(z)
+    print("\nU mean (toc_u_mean):")
+    print(toc_u_mean)
+
+#print_output(toc_z, toc_u_mean)
 
 # Read the file into a pandas DataFrame, skipping the header lines and setting column names
 try:
-    df = pd.read_csv(file_path, delimiter='\s+', skiprows=header_lines_to_skip, header=None, names=column_names)
-    
-    # Extracting the required columns and converting to floats
-    y_plus = df.iloc[1:, df.columns.get_loc("y^+")].reset_index(drop=True).astype(float)
-    u_plus = df.iloc[1:, df.columns.get_loc("U")].reset_index(drop=True).astype(float)
-    y_over_delta = df.iloc[1:, df.columns.get_loc("y/delta")].reset_index(drop=True).astype(float)
-    
-    # Calculate u_mean (u_mean_data)
-    u_mean_data = u_plus * u_tau
-    
-    # Calculate v_mean (all zeros)
-    v_mean_data = np.zeros_like(u_mean_data)
-    
-    # Create a DataFrame with desired columns
-    output_df = pd.DataFrame({
-        'y_over_delta': y_over_delta,
-        'u_mean': u_mean_data,
-        'v_mean': v_mean_data
-    })
-    
-    # Output DataFrame to TXT file with tab-separated values
-    output_df.to_csv('input_ReTau2000DNS.txt', sep='\t', index=False)
-    
+    output_df.to_csv('input_ReTau2000DNS.txt', sep=' ', index=False)
+
     # Plotting figure 1: Semilogx plot
     plt.figure(figsize=(12, 8))
     # Smooth log-law profile
-    plt.semilogx(y_plus_smooth, u_plus_smooth, linestyle='--', color='r', label='Smooth Analytical Profile')
+    plt.semilogx(smooth_y_plus, smooth_u_plus, linestyle='--', color='r', label='Smooth Analytical Profile')
 
     # DNS profile
-    plt.semilogx(y_plus, u_plus, marker='o', linestyle='-', color='b', label="LM2015 $Re_{\\tau}=2000$")
+    plt.semilogx(dns_y_plus, dns_u_plus, marker='o', linestyle='-', color='b', label="LM2015 $Re_{\\tau}=2000$")
+
+    # Turbulent Open Channel Periodic Data
+    plt.semilogx(toc_y_plus, toc_u_plus , marker='s', linestyle='-', color='k', label="ERF Periodic")
     
     # Labels
     plt.xlabel(r'$y^+$', fontsize=14, fontname='serif')
@@ -97,7 +115,8 @@ try:
     
     # Plotting figure 2: Second plot
     plt.figure(figsize=(12, 8))
-    plt.plot(u_mean_data, y_over_delta, marker='o', linestyle='-', color='g', label="LM2015 $Re_{\\tau}=2000$")
+    plt.plot(u_dns_data, y_over_delta, marker='o', linestyle='-', color='b', label="LM2015 $Re_{\\tau}=2000$")
+    plt.plot(toc_u_mean, toc_z, marker='s', linestyle='-', color='k', label="ERF Periodic")
     
     # Labels
     plt.xlabel(r'$\overline{U}$', fontsize=14, fontname='serif')
