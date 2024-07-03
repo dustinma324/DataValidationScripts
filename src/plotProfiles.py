@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.integrate import simpson
 
 # Define the file path
 file_path_dns = "../chan2000/LM_Channel_2000_mean_prof.dat.txt"
@@ -51,8 +52,17 @@ def read_dns_data(filename):
 dns_y_plus, dns_u_plus, y_over_delta = read_dns_data(file_path_dns)
 u_dns_data = dns_u_plus * u_tau
 v_mean_data = np.zeros_like(u_dns_data)
-output_df = pd.DataFrame({
+mixing_data = np.zeros_like(u_dns_data)
+potential_temp = np.full_like(u_dns_data, 300.0)
+output_df_sponge = pd.DataFrame({
     'y_over_delta': y_over_delta,
+    'u_mean': u_dns_data,
+    'v_mean': v_mean_data
+})
+output_df_sounding = pd.DataFrame({
+    'y_over_delta': y_over_delta,
+    'potential_temp': potential_temp,
+    'mixing_data':mixing_data,
     'u_mean': u_dns_data,
     'v_mean': v_mean_data
 })
@@ -68,6 +78,18 @@ toc_z, toc_u_mean = read_mean_data(file_path_mean)
 toc_y_plus = toc_z*smooth_u_tau/smooth_nu
 toc_u_plus = toc_u_mean/smooth_u_tau
 
+def compute_mean_velocity(heights, velocities):
+    heights = np.array(heights)
+    velocities = np.array(velocities)
+    integrated_velocity = simpson(y=velocities, x=heights)
+    total_height_range = heights[-1] - heights[0]
+    mean_velocity = integrated_velocity / total_height_range
+    
+    return mean_velocity
+
+toc_ubulk = compute_mean_velocity(toc_z, toc_u_mean)
+print(f"toc_bulk_u = {toc_ubulk}")
+
 def print_output(z, toc_u_mean):
     print("Height (z):")
     print(z)
@@ -78,7 +100,8 @@ def print_output(z, toc_u_mean):
 
 # Read the file into a pandas DataFrame, skipping the header lines and setting column names
 try:
-    output_df.to_csv('input_ReTau2000DNS.txt', sep=' ', index=False)
+    output_df_sponge.to_csv('input_ReTau2000DNS_sponge.txt', sep=' ', index=False)
+    output_df_sounding.to_csv('input_ReTau2000DNS_sounding.txt', sep=' ', index=False)
 
     # Plotting figure 1: Semilogx plot
     plt.figure(figsize=(12, 8))
@@ -116,7 +139,7 @@ try:
     # Plotting figure 2: Second plot
     plt.figure(figsize=(12, 8))
     plt.plot(u_dns_data, y_over_delta, marker='o', linestyle='-', color='b', label="LM2015 $Re_{\\tau}=2000$")
-    plt.plot(toc_u_mean, toc_z, marker='s', linestyle='-', color='k', label="ERF Periodic")
+    plt.plot(toc_u_mean/toc_ubulk, toc_z, marker='s', linestyle='-', color='k', label="ERF Periodic")
     
     # Labels
     plt.xlabel(r'$\overline{U}$', fontsize=14, fontname='serif')
