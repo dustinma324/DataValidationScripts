@@ -10,9 +10,6 @@ file_path_mean = "./mean.dat"
 # Number of header rows to skip
 header_lines_to_skip = 71
 
-# Column names
-column_names = ["y/delta", "y^+", "U", "dU/dy", "W", "P"]
-
 # Additional variables
 nx = 4096
 ny = 768
@@ -43,7 +40,7 @@ smooth_u_plus = smooth_log_law_profile(smooth_y_plus, smooth_u_tau, smooth_nu)
 
 def read_dns_data(filename):
    columnsDNS = ["y/delta", "y^+", "U", "dU/dy", "W", "P"]
-   data_DNS = pd.read_csv(file_path_dns, delimiter='\s+', skiprows=header_lines_to_skip, header=None, names=column_names)
+   data_DNS = pd.read_csv(file_path_dns, delimiter='\s+', skiprows=header_lines_to_skip, header=None, names=columnsDNS)
    y_plus = data_DNS.iloc[1:, data_DNS.columns.get_loc("y^+")].reset_index(drop=True).astype(float)
    u_plus = data_DNS.iloc[1:, data_DNS.columns.get_loc("U")].reset_index(drop=True).astype(float)
    y_over_delta = data_DNS.iloc[1:, data_DNS.columns.get_loc("y/delta")].reset_index(drop=True).astype(float)
@@ -68,7 +65,7 @@ output_df_sounding = pd.DataFrame({
 })
 
 def read_mean_data(filename):
-    columns = ["time", "height", "u", "v", "w", "rho", "theta", "tke", "col9", "col10", "col11", "col12", "col13", "col14"]
+    columns = ["time", "height", "u", "v", "w", "rho", "theta", "tke", "col9", "col10", "col11", "col12", "col13", "col14", "col15"]
     data_toc = pd.read_csv(filename, sep='\s+', header=None, names=columns)
     toc_z = data_toc.iloc[1:, data_toc.columns.get_loc("height")].reset_index(drop=True).astype(float)
     toc_u_mean = data_toc.iloc[1:, data_toc.columns.get_loc("u")].reset_index(drop=True).astype(float)

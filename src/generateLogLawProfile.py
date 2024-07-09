@@ -30,8 +30,8 @@ data_sponge = np.column_stack((heights, u, v))
 filename = "input_ReTau2000Ana"
 filetype = ".txt"
 
-np.savetxt(filename+"_sounding"+filetype, data_sounding, header="y theta mr u v", fmt="%.8e", delimiter='\t')
+np.savetxt(filename+"_sounding"+filetype, data_sounding, header="y theta mr u v", fmt="%.8e", delimiter=' ')
 print(f"Data saved to {filename}_sounding{filetype}.")
-np.savetxt(filename+"_sponge"+filetype, data_sponge, header="y u v", fmt="%.8e", delimiter='\t')
+np.savetxt(filename+"_sponge"+filetype, data_sponge, header="y u v", fmt="%.8e", delimiter=' ')
 print(f"Data saved to {filename}_sponge{filetype}.")
 
