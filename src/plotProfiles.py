@@ -5,7 +5,9 @@ from scipy.integrate import simpson
 
 # Define the file path
 file_path_dns = "../chan2000/LM_Channel_2000_mean_prof.dat.txt"
-file_path_mean = "./mean.dat"
+#file_path_mean = "./mean_dpdpx0.08.dat" // This is values from ChatGPT
+file_path_mean = "./mean_dpdpx0.04.dat"
+#file_path_mean = "./mean_dpdpx0.02.dat"
 
 # Number of header rows to skip
 header_lines_to_skip = 71
@@ -17,37 +19,39 @@ nz = 3072
 Lx = 8 * np.pi
 Lz = 3 * np.pi
 n = 7
-nu = 2.30000e-05
-delta = 1.000
-U_mean = 1.000
-u_tau = 4.58794e-02
+
+DNS_nu = 2.30000e-05
+DNS_U_mean = 1.000
+DNS_u_tau = 4.58794e-02
 Re_tau = 1994.756
 
 # Smooth log-law profile parameters
 smooth_Re_tau = 2000
 smooth_u_tau = 0.2
-smooth_nu = 0.0001
+smooth_mu = 0.0001
 smooth_delta = 1.0
 
 # Compute the smooth log-law profile
 def smooth_log_law_profile(y_plus, u_tau, nu):
     kappa = 0.41
-    B = 5.2
+    B = 5.
     return (1/kappa) * np.log(y_plus) + B
 
-smooth_y_plus = np.linspace(1e-3, smooth_delta, 500) * smooth_u_tau / smooth_nu
-smooth_u_plus = smooth_log_law_profile(smooth_y_plus, smooth_u_tau, smooth_nu)
+smooth_y_plus = np.linspace(1e-3, smooth_delta, 500) * smooth_u_tau / smooth_mu
+smooth_u_plus = smooth_log_law_profile(smooth_y_plus, smooth_u_tau, smooth_mu)
 
 def read_dns_data(filename):
    columnsDNS = ["y/delta", "y^+", "U", "dU/dy", "W", "P"]
    data_DNS = pd.read_csv(file_path_dns, delimiter='\s+', skiprows=header_lines_to_skip, header=None, names=columnsDNS)
-   y_plus = data_DNS.iloc[1:, data_DNS.columns.get_loc("y^+")].reset_index(drop=True).astype(float)
-   u_plus = data_DNS.iloc[1:, data_DNS.columns.get_loc("U")].reset_index(drop=True).astype(float)
+   y_plus_dns = data_DNS.iloc[1:, data_DNS.columns.get_loc("y^+")].reset_index(drop=True).astype(float)
+   u_dns_plus = data_DNS.iloc[1:, data_DNS.columns.get_loc("U")].reset_index(drop=True).astype(float)
    y_over_delta = data_DNS.iloc[1:, data_DNS.columns.get_loc("y/delta")].reset_index(drop=True).astype(float)
-   return y_plus, u_plus, y_over_delta
+   return y_plus_dns, u_dns_plus, y_over_delta
 
 dns_y_plus, dns_u_plus, y_over_delta = read_dns_data(file_path_dns)
-u_dns_data = dns_u_plus * u_tau
+u_dns_data = dns_u_plus * DNS_u_tau
+
+# Data output for Sponging and Sounding
 v_mean_data = np.zeros_like(u_dns_data)
 mixing_data = np.zeros_like(u_dns_data)
 potential_temp = np.full_like(u_dns_data, 300.0)
@@ -67,13 +71,23 @@ output_df_sounding = pd.DataFrame({
 def read_mean_data(filename):
     columns = ["time", "height", "u", "v", "w", "rho", "theta", "tke", "col9", "col10", "col11", "col12", "col13", "col14", "col15"]
     data_toc = pd.read_csv(filename, sep='\s+', header=None, names=columns)
-    toc_z = data_toc.iloc[1:, data_toc.columns.get_loc("height")].reset_index(drop=True).astype(float)
-    toc_u_mean = data_toc.iloc[1:, data_toc.columns.get_loc("u")].reset_index(drop=True).astype(float)
-    return toc_z, toc_u_mean
+    toc_z = data_toc.iloc[0:, data_toc.columns.get_loc("height")].reset_index(drop=True).astype(float)
+    toc_u_mean = data_toc.iloc[0:, data_toc.columns.get_loc("u")].reset_index(drop=True).astype(float)
+    toc_rho = data_toc.iloc[0:, data_toc.columns.get_loc("rho")].reset_index(drop=True).astype(float)
+    return toc_z, toc_u_mean, toc_rho
 
-toc_z, toc_u_mean = read_mean_data(file_path_mean)
-toc_y_plus = toc_z*smooth_u_tau/smooth_nu
-toc_u_plus = toc_u_mean/smooth_u_tau
+toc_z, toc_u_mean, toc_rho = read_mean_data(file_path_mean)
+#print(f"{toc_z}\n{toc_u_mean}\n{toc_rho}")
+
+# Normalizing by analytical data
+#toc_y_plus = toc_z*smooth_u_tau/smooth_mu
+#toc_u_plus = toc_u_mean/smooth_u_tau 
+
+# Normalizing by simulation data
+toc_utau = np.sqrt( (smooth_mu/toc_rho[0]) * (toc_u_mean[0] / toc_z[0]) )
+toc_y_plus = toc_z * toc_utau / (smooth_mu/toc_rho[0])
+toc_u_plus = toc_u_mean / toc_utau
+print(f"toc_utau = {toc_utau}")
 
 def compute_mean_velocity(heights, velocities):
     heights = np.array(heights)
@@ -81,7 +95,6 @@ def compute_mean_velocity(heights, velocities):
     integrated_velocity = simpson(y=velocities, x=heights)
     total_height_range = heights[-1] - heights[0]
     mean_velocity = integrated_velocity / total_height_range
-    
     return mean_velocity
 
 toc_ubulk = compute_mean_velocity(toc_z, toc_u_mean)
@@ -139,7 +152,7 @@ try:
     plt.plot(toc_u_mean/toc_ubulk, toc_z, marker='s', linestyle='-', color='k', label="ERF Periodic")
     
     # Labels
-    plt.xlabel(r'$\overline{U}$', fontsize=14, fontname='serif')
+    plt.xlabel(r'$\overline{U}/U_{B}$', fontsize=14, fontname='serif')
     plt.ylabel(r'$y/\delta$', fontsize=14, fontname='serif')
     
     # Set x and y limits
