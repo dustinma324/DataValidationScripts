@@ -174,5 +174,5 @@ GNUTERM = "wxt"
 I = {0.0, 1.0}
 VoxelDistance = 0.0
 ## Last datafile plotted: "sponge_len0.5_str100000_x0.1_space_delimited.txt"
-p"input_ReTau2000DNS_sponge.txt" u 1:2 w l lw 4 linecolor rgb "black", "spongeData/sponge_len2_str25000_x0.1_space_delimited.txt" u 12:6 pt 7, "spongeData/sponge_len2_str50000_x0.1_space_delimited.txt" u 12:6 pt 5, "spongeData/sponge_len1_str50000_x0.1_space_delimited.txt" u 12:6 pt 3, "spongeData/sponge_len1_str100000_x0.1_space_delimited.txt" u 12:6 pt 9, "spongeData/sponge_len0.5_str100000_x0.1_space_delimited.txt" u 12:6 pt 1 linecolor rgb "red", "spongeData/sponge_len1_str100000_x5.0_space_delimited.txt" u 12:6 pt 11
+p"input_ReTau2000DNS_sponge.txt" u 1:2 w l lw 4 linecolor rgb "black", "spongeData/sponge_len2_str25000_x0.1_space_delimited.txt" u 12:6 pt 7, "spongeData/sponge_len2_str50000_x0.1_space_delimited.txt" u 12:6 pt 5, "spongeData/sponge_len1_str50000_x0.1_space_delimited.txt" u 12:6 pt 3, "spongeData/sponge_len1_str100000_x0.1_space_delimited.txt" u 12:6 pt 9, "spongeData/sponge_len0.5_str100000_x0.1_space_delimited.txt" u 12:6 pt 1 linecolor rgb "red", "spongeData/sponge_len1_str100000_x5.0_space_delimited.txt" u 12:6 pt 11, "spongeData/new_sponge_len0.2_str1000_x0.5_space_delimited.txt" u 12:6 pt 13
 #    EOF
