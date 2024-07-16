@@ -1,12 +1,14 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import simpson
+#from scipy.integrate import simpson
+from scipy.integrate import simps
+
 
 # Define the file path
 file_path_dns = "../chan2000/LM_Channel_2000_mean_prof.dat.txt"
-#file_path_mean = "./mean_dpdpx0.08.dat" // This is values from ChatGPT
-file_path_mean = "./mean_dpdpx0.04.dat"
+file_path_mean = "./mean_dpdpx0.08.dat" # This is values from ChatGPT
+#file_path_mean = "./mean_dpdpx0.04.dat"
 #file_path_mean = "./mean_dpdpx0.02.dat"
 
 # Number of header rows to skip
@@ -80,19 +82,20 @@ toc_z, toc_u_mean, toc_rho = read_mean_data(file_path_mean)
 #print(f"{toc_z}\n{toc_u_mean}\n{toc_rho}")
 
 # Normalizing by analytical data
-#toc_y_plus = toc_z*smooth_u_tau/smooth_mu
-#toc_u_plus = toc_u_mean/smooth_u_tau 
+toc_y_plus = toc_z*smooth_u_tau/smooth_mu
+toc_u_plus = toc_u_mean/smooth_u_tau 
 
 # Normalizing by simulation data
-toc_utau = np.sqrt( (smooth_mu/toc_rho[0]) * (toc_u_mean[0] / toc_z[0]) )
-toc_y_plus = toc_z * toc_utau / (smooth_mu/toc_rho[0])
-toc_u_plus = toc_u_mean / toc_utau
-print(f"toc_utau = {toc_utau}")
+#toc_utau = np.sqrt( (smooth_mu/toc_rho[0]) * (toc_u_mean[0] / toc_z[0]) )
+#toc_y_plus = toc_z * toc_utau / (smooth_mu/toc_rho[0])
+#toc_u_plus = toc_u_mean / toc_utau
+#print(f"toc_utau = {toc_utau}")
 
 def compute_mean_velocity(heights, velocities):
     heights = np.array(heights)
     velocities = np.array(velocities)
-    integrated_velocity = simpson(y=velocities, x=heights)
+    #integrated_velocity = simpson(y=velocities, x=heights)
+    integrated_velocity = simps(y=velocities, x=heights)
     total_height_range = heights[-1] - heights[0]
     mean_velocity = integrated_velocity / total_height_range
     return mean_velocity
