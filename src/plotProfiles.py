@@ -7,7 +7,8 @@ from scipy.integrate import simps
 
 # Define the file path
 file_path_dns = "../chan2000/LM_Channel_2000_mean_prof.dat.txt"
-file_path_mean = "./mean_dpdpx0.08.dat" # This is values from ChatGPT
+file_path_mean = "./mean_dpdpx0.08_v2.dat"
+#file_path_mean = "./mean_dpdpx0.08.dat" # This is values from ChatGPT
 #file_path_mean = "./mean_dpdpx0.04.dat"
 #file_path_mean = "./mean_dpdpx0.02.dat"
 
@@ -29,14 +30,15 @@ Re_tau = 1994.756
 
 # Smooth log-law profile parameters
 smooth_Re_tau = 2000
-smooth_u_tau = 0.2
 smooth_mu = 0.0001
 smooth_delta = 1.0
+smooth_u_tau = smooth_Re_tau * smooth_mu / smooth_delta
+print(f"smooth_u_tau = {smooth_u_tau}")
 
 # Compute the smooth log-law profile
 def smooth_log_law_profile(y_plus, u_tau, nu):
     kappa = 0.41
-    B = 5.
+    B = 5.2
     return (1/kappa) * np.log(y_plus) + B
 
 smooth_y_plus = np.linspace(1e-3, smooth_delta, 500) * smooth_u_tau / smooth_mu
@@ -79,17 +81,19 @@ def read_mean_data(filename):
     return toc_z, toc_u_mean, toc_rho
 
 toc_z, toc_u_mean, toc_rho = read_mean_data(file_path_mean)
-#print(f"{toc_z}\n{toc_u_mean}\n{toc_rho}")
 
-# Normalizing by analytical data
-toc_y_plus = toc_z*smooth_u_tau/smooth_mu
-toc_u_plus = toc_u_mean/smooth_u_tau 
+norm_by_smooth = 1
 
-# Normalizing by simulation data
-#toc_utau = np.sqrt( (smooth_mu/toc_rho[0]) * (toc_u_mean[0] / toc_z[0]) )
-#toc_y_plus = toc_z * toc_utau / (smooth_mu/toc_rho[0])
-#toc_u_plus = toc_u_mean / toc_utau
-#print(f"toc_utau = {toc_utau}")
+if norm_by_smooth == 1:
+  # Normalizing by analytical data
+  toc_y_plus = toc_z*smooth_u_tau/smooth_mu
+  toc_u_plus = toc_u_mean/smooth_u_tau 
+elif norm_by_smooth == 0:
+  # Normalizing by simulation data
+  toc_utau = np.sqrt( (smooth_mu/toc_rho[0]) * (toc_u_mean[0] / toc_z[0]) )
+  toc_y_plus = toc_z * toc_utau / (smooth_mu/toc_rho[0])
+  toc_u_plus = toc_u_mean / toc_utau
+  print(f"toc_utau = {toc_utau}")
 
 def compute_mean_velocity(heights, velocities):
     heights = np.array(heights)
