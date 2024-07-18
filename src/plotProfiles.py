@@ -6,31 +6,29 @@ from scipy.integrate import simps
 
 
 # Define the file path
-file_path_dns = "../chan2000/LM_Channel_2000_mean_prof.dat.txt"
+#file_path_dns = "../chan2000/LM_Channel_2000_mean_prof.dat.txt"
+#header_lines_to_skip = 71
+
+file_path_dns = "../chan180/MKM_Channel_180_mean_prof.txt"
+header_lines_to_skip = 24
+
 file_path_mean = "./mean_dpdpx0.08_v2.dat"
-#file_path_mean = "./mean_dpdpx0.08.dat" # This is values from ChatGPT
+#file_path_mean = "./mean_dpdpx0.08.dat"
 #file_path_mean = "./mean_dpdpx0.04.dat"
 #file_path_mean = "./mean_dpdpx0.02.dat"
 
-# Number of header rows to skip
-header_lines_to_skip = 71
+#DNS_nu = 2.30000e-05
+#DNS_U_mean = 1.000
+#DNS_u_tau = 4.58794e-02
+#Re_tau = 1994.756
 
-# Additional variables
-nx = 4096
-ny = 768
-nz = 3072
-Lx = 8 * np.pi
-Lz = 3 * np.pi
-n = 7
-
-DNS_nu = 2.30000e-05
-DNS_U_mean = 1.000
 DNS_u_tau = 4.58794e-02
-Re_tau = 1994.756
+#Re_tau = 1994.756
+Re_tau = 178.12
 
 # Smooth log-law profile parameters
-smooth_Re_tau = 2000
-smooth_mu = 0.0001
+smooth_Re_tau = 180
+smooth_mu = 0.001
 smooth_delta = 1.0
 smooth_u_tau = smooth_Re_tau * smooth_mu / smooth_delta
 print(f"smooth_u_tau = {smooth_u_tau}")
@@ -41,7 +39,7 @@ def smooth_log_law_profile(y_plus, u_tau, nu):
     B = 5.2
     return (1/kappa) * np.log(y_plus) + B
 
-smooth_y_plus = np.linspace(1e-3, smooth_delta, 500) * smooth_u_tau / smooth_mu
+smooth_y_plus = np.linspace(1e-1, smooth_delta, 500) * smooth_u_tau / smooth_mu
 smooth_u_plus = smooth_log_law_profile(smooth_y_plus, smooth_u_tau, smooth_mu)
 
 def read_dns_data(filename):
@@ -53,7 +51,7 @@ def read_dns_data(filename):
    return y_plus_dns, u_dns_plus, y_over_delta
 
 dns_y_plus, dns_u_plus, y_over_delta = read_dns_data(file_path_dns)
-u_dns_data = dns_u_plus * DNS_u_tau
+u_dns_data = dns_u_plus
 
 # Data output for Sponging and Sounding
 v_mean_data = np.zeros_like(u_dns_data)
@@ -155,7 +153,7 @@ try:
     
     # Plotting figure 2: Second plot
     plt.figure(figsize=(12, 8))
-    plt.plot(u_dns_data, y_over_delta, marker='o', linestyle='-', color='b', label="LM2015 $Re_{\\tau}=2000$")
+    plt.plot(u_dns_data, y_over_delta, marker='o', linestyle='-', color='b', label="LM2015 $Re_{\\tau}=180$")
     plt.plot(toc_u_mean/toc_ubulk, toc_z, marker='s', linestyle='-', color='k', label="ERF Periodic")
     
     # Labels
