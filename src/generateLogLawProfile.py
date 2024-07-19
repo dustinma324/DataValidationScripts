@@ -1,10 +1,12 @@
 import numpy as np
 
 # Given parameters
-Re_tau = 2000
-kinematic_viscosity = 0.0001
+#Re_tau = 2000
+Re_tau = 180
+#kinematic_viscosity = 0.0001
+kinematic_viscosity = 0.001
 height_start = 1e-2
-height_end = 8.0
+height_end = 1.0
 num_points = 256
 kappa = 0.41  # Von Kármán constant
 B = 5.2
