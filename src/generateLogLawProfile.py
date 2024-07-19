@@ -1,7 +1,7 @@
 import numpy as np
 
 # Given parameters
-Re_tau = 180
+Re_tau = 395
 kinematic_viscosity = 0.001
 height_start = 1e-2
 height_end = 1.0

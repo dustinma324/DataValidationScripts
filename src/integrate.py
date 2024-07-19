@@ -2,7 +2,7 @@ import numpy as np
 from scipy.integrate import quad
 
 # Given parameters
-u_tau = 0.18  # friction velocity
+u_tau = 0.395  # friction velocity
 nu = 0.001  # kinematic viscosity
 H = 1.0  # channel height
 kappa = 0.41  # von Kármán constant
