@@ -1,9 +1,7 @@
 import numpy as np
 
 # Given parameters
-#Re_tau = 2000
 Re_tau = 180
-#kinematic_viscosity = 0.0001
 kinematic_viscosity = 0.001
 height_start = 1e-2
 height_end = 1.0
@@ -24,16 +22,19 @@ print(f"u = {u}")
 
 # Create v values (set all v values to 0)
 v = np.zeros_like(heights)
+w = np.zeros_like(heights)
 mixing_ratio = np.zeros_like(heights)
 potential_temp = np.full_like(heights, 300.0)
 
 # Prepare data to write to file
 data_sounding = np.column_stack((heights, potential_temp, mixing_ratio, u, v))
 data_sponge = np.column_stack((heights, u, v))
+data_inflow = np.column_stack((heights, u, v, w))
 
 # Add the initial rows
 data_sounding = np.vstack([[0.0, 300.0, 0.0, 0.0, 0.0], data_sounding])
 data_sponge = np.vstack([[0.0, 0.0, 0.0], data_sponge])
+data_inflow = np.vstack([[0.0, 0.0, 0.0, 0.0], data_inflow])
 
 # Save data to file
 filename = f"input_ReTau{Re_tau}Ana"
@@ -43,3 +44,5 @@ np.savetxt(filename + "_sounding" + filetype, data_sounding, fmt="%.8e", delimit
 print(f"Data saved to {filename}_sounding{filetype}.")
 np.savetxt(filename + "_sponge" + filetype, data_sponge, fmt="%.8e", delimiter=' ')
 print(f"Data saved to {filename}_sponge{filetype}.")
+np.savetxt(filename + "_inflow" + filetype, data_inflow, fmt="%.8e", delimiter=' ')
+print(f"Data saved to {filename}_inflow{filetype}.")
