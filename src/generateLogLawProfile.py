@@ -36,7 +36,7 @@ data_sounding = np.vstack([[0.0, 300.0, 0.0, 0.0, 0.0], data_sounding])
 data_sponge = np.vstack([[0.0, 0.0, 0.0], data_sponge])
 
 # Save data to file
-filename = "input_ReTau2000Ana"
+filename = f"input_ReTau{Re_tau}Ana"
 filetype = ".txt"
 
 np.savetxt(filename + "_sounding" + filetype, data_sounding, fmt="%.8e", delimiter=' ')
