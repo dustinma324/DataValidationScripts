@@ -8,26 +8,19 @@ from scipy.integrate import simps
 # Define the file path
 #file_path_dns = "../chan2000/LM_Channel_2000_mean_prof.dat.txt"
 #header_lines_to_skip = 71
-
-file_path_dns = "../chan180/MKM_Channel_180_mean_prof.txt"
+#file_path_dns = "../chan180/MKM_Channel_180_mean_prof.txt"
+file_path_dns = "../chan395/MKM_Channel_395_mean_prof.txt"
 header_lines_to_skip = 24
 
-file_path_mean = "./mean_dpdpx0.08_v2.dat"
-#file_path_mean = "./mean_dpdpx0.08.dat"
-#file_path_mean = "./mean_dpdpx0.04.dat"
-#file_path_mean = "./mean_dpdpx0.02.dat"
+file_path_mean = "./mean_ReTau395.dat"
+#file_path_mean = "./mean_dpdpx0.08_v2.dat"
 
-#DNS_nu = 2.30000e-05
-#DNS_U_mean = 1.000
 #DNS_u_tau = 4.58794e-02
 #Re_tau = 1994.756
-
-DNS_u_tau = 4.58794e-02
-#Re_tau = 1994.756
-Re_tau = 178.12
+Re_tau = 395
 
 # Smooth log-law profile parameters
-smooth_Re_tau = 180
+smooth_Re_tau = Re_tau
 smooth_mu = 0.001
 smooth_delta = 1.0
 smooth_u_tau = smooth_Re_tau * smooth_mu / smooth_delta
@@ -122,12 +115,8 @@ try:
     plt.figure(figsize=(12, 8))
     # Smooth log-law profile
     plt.semilogx(smooth_y_plus, smooth_u_plus, linestyle='--', color='r', label='Smooth Analytical Profile')
-
-    # DNS profile
-    plt.semilogx(dns_y_plus, dns_u_plus, marker='o', linestyle='-', color='b', label="LM2015 $Re_{\\tau}=2000$")
-
-    # Turbulent Open Channel Periodic Data
-    plt.semilogx(toc_y_plus, toc_u_plus , marker='s', linestyle='-', color='k', label="ERF Periodic")
+    plt.semilogx(dns_y_plus, dns_u_plus, marker='o', linestyle='-', color='b', label="LM2015 $Re_{\\tau}=$"+f"{Re_tau}")
+    plt.semilogx(toc_y_plus, toc_u_plus , marker='s', linestyle='-', color='k', label="ERF Periodic $Re_{\\tau}=$"+f"{Re_tau}")
     
     # Labels
     plt.xlabel(r'$y^+$', fontsize=14, fontname='serif')
@@ -153,8 +142,8 @@ try:
     
     # Plotting figure 2: Second plot
     plt.figure(figsize=(12, 8))
-    plt.plot(u_dns_data, y_over_delta, marker='o', linestyle='-', color='b', label="LM2015 $Re_{\\tau}=180$")
-    plt.plot(toc_u_mean/toc_ubulk, toc_z, marker='s', linestyle='-', color='k', label="ERF Periodic")
+    plt.plot(u_dns_data, y_over_delta, marker='o', linestyle='-', color='b', label="LM2015 $Re_{\\tau}=$"+f"{Re_tau}")
+    plt.plot(toc_u_mean/toc_ubulk, toc_z, marker='s', linestyle='-', color='k', label="ERF Periodic $Re_{\\tau}=$"+f"{Re_tau}")
     
     # Labels
     plt.xlabel(r'$\overline{U}/U_{B}$', fontsize=14, fontname='serif')
